@@ -1,0 +1,47 @@
+services:
+  kafka:
+    container_name: kafka
+    image: bitnami/kafka:3.3.2
+    ports:
+      - 9092:9092
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+  
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:master
+    ports:
+      - 8080:8080
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=kafka-0
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      - kafka
+
+  kafka-worker0:
+    container_name: kafka-worker0
+    image: debezium/connect:2.2
+    environment:
+      - GROUP_ID=1 # Kafka ワーカーノードのクラスターの ID
+      - CONFIG_STORAGE_TOPIC=config-storage-topic
+      - OFFSET_STORAGE_TOPIC=offset-storage-topic
+      - STATUS_STORAGE_TOPIC=status-storage-topic
+      - BOOTSTRAP_SERVERS=kafka:9092
+    ports:
+      - 8083:8083
+    depends_on:
+      - kafka
+
+  mysql0:
+    container_name: mysql0
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - type: bind
+        source: ./mysql/sql
+        target: /docker-entrypoint-initdb.d
+      - type: bind
+        source: ./mysql/conf
+        target: /etc/mysql/conf.d
+

@@ -1,0 +1,21 @@
+{
+  "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+  "database.hostname": "mysql0",
+  "database.port": "3306",
+  "database.user": "debezium",
+  "database.password": "password",
+  "database.server.id": 200,
+  "table.include.list": "sample.outbox",
+  "topic.prefix": "topic-prefix0",
+  "schema.history.internal": "io.debezium.storage.file.history.FileSchemaHistory",
+  "schema.history.internal.file.filename": "data/schema_history.dat",
+  "transforms": "outbox",
+  "transforms.outbox.type":"io.debezium.transforms.outbox.EventRouter",
+  "transforms.outbox.table.field.event.id": "id",
+  "transforms.outbox.table.field.event.key": "key",
+  "transforms.outbox.table.field.timestamp": "timestamp",
+  "transforms.outbox.table.field.payload": "payload",
+  "transforms.outbox.route.by.field": "topic",
+  "transforms.outbox.route.topic.replacement": "$1",
+  "transforms.outbox.table.field.event.schema.version": "schema_version"
+}
