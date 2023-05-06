@@ -65,3 +65,8 @@ curl -i -X PUT http://localhost:8083/connectors/mysql0-sample.outbox/config -H "
 
 - わかりやすい
   - https://docs.confluent.io/platform/current/connect/references/restapi.html#tasks
+### オーバーライド
+
+- https://docs.confluent.io/ja-jp/platform/7.1/connect/references/allconfigs.html#override-the-worker-configuration
+
+- https://docs.confluent.io/platform/current/multi-dc-deployments/replicator/replicator-run.html#running-crep-on-the-source-cluster

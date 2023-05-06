@@ -12,6 +12,7 @@
     "topic.prefix": "topic-prefix0",
     "schema.history.internal": "io.debezium.storage.file.history.FileSchemaHistory",
     "schema.history.internal.file.filename": "data/schema_history.dat",
+    "producer.override.bootstrap.servers": "kafka-event:9092",
     "transforms": "outbox",
     "transforms.outbox.type":"io.debezium.transforms.outbox.EventRouter",
     "transforms.outbox.table.field.event.id": "id",
