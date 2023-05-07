@@ -6,6 +6,11 @@ services:
       - 9092:9092
     environment:
       - ALLOW_PLAINTEXT_LISTENER=yes
+    networks:
+      - kafka-net0
+      - kafka-net1
+      - kafka-net2
+
   kafka-event:
     container_name: kafka-event
     image: bitnami/kafka:3.3.2
@@ -13,7 +18,11 @@ services:
       - 9093:9092
     environment:
       - ALLOW_PLAINTEXT_LISTENER=yes
-  
+    networks:
+      - kafka-net0
+      - kafka-net1
+      - kafka-net2
+
   kafka-ui:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:master
@@ -26,21 +35,66 @@ services:
       - KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS=kafka-event:9092
     depends_on:
       - kafka
+    networks:
+      - kafka-net0
+      - kafka-net1
+      - kafka-net2
 
   kafka-worker0:
     container_name: kafka-worker0
     image: debezium/connect:2.2
     environment:
-      - GROUP_ID=1 # Kafka ワーカーノードのクラスターの ID
+      # Kafka ワーカーノードのクラスターの ID
+      # https://docs.confluent.io/ja-jp/platform/7.1/connect/userguide.html#distributed-mode
+      - GROUP_ID=1 
       - CONFIG_STORAGE_TOPIC=config-storage-topic
       - OFFSET_STORAGE_TOPIC=offset-storage-topic
       - STATUS_STORAGE_TOPIC=status-storage-topic
       - BOOTSTRAP_SERVERS=kafka:9092
+      - CONNECT_REST_ADVERTISED_HOST_NAME=kafka-worker0
       - CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY=All
     ports:
       - 8083:8083
     depends_on:
       - kafka
+    networks:
+      - kafka-net0
+      - kafka-net1
+
+  kafka-worker1:
+    container_name: kafka-worker1
+    image: debezium/connect:2.2
+    environment:
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=config-storage-topic
+      - OFFSET_STORAGE_TOPIC=offset-storage-topic
+      - STATUS_STORAGE_TOPIC=status-storage-topic
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - CONNECT_REST_ADVERTISED_HOST_NAME=kafka-worker1
+      - CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY=All
+    ports:
+      - 8084:8083
+    depends_on:
+      - kafka
+    networks:
+      - kafka-net0
+      - kafka-net1
+
+  kafka-worker2:
+    container_name: kafka-worker2
+    image: debezium/connect:2.2
+    environment:
+      - GROUP_ID=2
+      - CONFIG_STORAGE_TOPIC=config-storage-topic2
+      - OFFSET_STORAGE_TOPIC=offset-storage-topic2
+      - STATUS_STORAGE_TOPIC=status-storage-topic2
+      - BOOTSTRAP_SERVERS=kafka:9092
+    ports:
+      - 8085:8083
+    depends_on:
+      - kafka
+    networks:
+      - kafka-net2
 
   mysql0:
     container_name: mysql0
@@ -54,4 +108,40 @@ services:
       - type: bind
         source: ./mysql/conf
         target: /etc/mysql/conf.d
+    networks:
+      - kafka-net0
 
+  mysql1:
+    container_name: mysql1
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - type: bind
+        source: ./mysql/sql
+        target: /docker-entrypoint-initdb.d
+      - type: bind
+        source: ./mysql/conf
+        target: /etc/mysql/conf.d
+    networks:
+      - kafka-net1
+
+  mysql2:
+    container_name: mysql2
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - type: bind
+        source: ./mysql/sql
+        target: /docker-entrypoint-initdb.d
+      - type: bind
+        source: ./mysql/conf
+        target: /etc/mysql/conf.d
+    networks:
+      - kafka-net2
+
+networks:
+  kafka-net0:
+  kafka-net1:
+  kafka-net2:

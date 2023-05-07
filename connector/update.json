@@ -1,6 +1,6 @@
 {
   "connector.class": "io.debezium.connector.mysql.MySqlConnector",
-  "database.hostname": "mysql0",
+  "database.hostname": "mysql1",
   "database.port": "3306",
   "database.user": "debezium",
   "database.password": "password",
